@@ -58,6 +58,6 @@ main()
     console.error('Error inserting data:', error)
   })
   .finally(async () => {
-    // Close PrismaClient connection
+    // PrismaClient connection Close 
     await prisma.$disconnect()
   })
