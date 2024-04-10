@@ -5,21 +5,375 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GraphQL CRUD Frontend</title>
   <link rel="stylesheet" href="styles.css">
+  <nav>
+    <ul>
+      <li><a href="#">Home</a></li>
+    </ul>
+  </nav>
 </head>
 <body>
-  <header>
-    <h1>ORM Database</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="user_operations.html">Manage Users</a></li>
-        <li><a href="product_operations.html">Manage Products</a></li>
-        <li><a href="order_operations.html">Manage Orders</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    <p>This project aims to design and implement a backend system using GraphQL, Prisma, and more.</p>
-    </main>
+  <h1>User Operations</h1>
+  <h2>Create User</h2>
+  <form id="createUserForm">
+    <label for="createUsername">Username:</label>
+    <input type="text" id="createUsername" name="username">
+    <label for="createEmail">Email:</label>
+    <input type="email" id="createEmail" name="email" >
+    <button type="submit">Create User</button>
+    <p id="createUserMessage"></p>
+  </form>
+
+  <h2>Update User</h2>
+  <form id="updateUserForm">
+    <label for="updateUserId">User ID:</label>
+    <input type="number" id="updateUserId" name="id">
+    <label for="updateUsername">New Username:</label>
+    <input type="text" id="updateUsername" name="username">
+    <label for="updateEmail">New Email:</label>
+    <input type="email" id="updateEmail" name="email">
+    <button type="submit">Update User</button>
+    <p id="updateUserMessage"></p>
+  </form>
+
+  <h2>Delete User</h2>
+  <form id="deleteUserForm">
+    <label for="deleteUserId">User ID:</label>
+    <input type="number" id="deleteUserId" name="id" >
+    <button type="submit">Delete User</button>
+    <p id="deleteUserMessage"></p>
+  </form>
+
+  <!-- Product Operations -->
+  <h1>Product Operations</h1>
+
+  <h2>Create Product</h2>
+  <form id="createProductForm">
+    <label for="createProductName">Name:</label>
+    <input type="text" id="createProductName" name="name" >
+    <label for="createProductDescription">Description:</label>
+    <input type="text" id="createProductDescription" name="description">
+    <label for="createProductPrice">Price:</label>
+    <input type="number" id="createProductPrice" name="price">
+    <button type="submit">Create Product</button>
+    <p id="createProductMessage"></p>
+  </form>
+
+  <h2>Update Product</h2>
+  <form id="updateProductForm">
+    <label for="updateProductId">Product ID:</label>
+    <input type="number" id="updateProductId" name="id" >
+    <label for="updateProductName">New Name:</label>
+    <input type="text" id="updateProductName" name="name">
+    <label for="updateProductDescription">New Description:</label>
+    <input type="text" id="updateProductDescription" name="description">
+    <label for="updateProductPrice">New Price:</label>
+    <input type="number" id="updateProductPrice" name="price">
+    <button type="submit">Update Product</button>
+    <p id="updateProductMessage"></p>
+  </form>
+
+  <h2>Delete Product</h2>
+  <form id="deleteProductForm">
+    <label for="deleteProductId">Product ID:</label>
+    <input type="number" id="deleteProductId" name="id" >
+    <button type="submit">Delete Product</button>
+    <p id="deleteProductMessage"></p>
+
+    <h1>Order Operations</h1>
+
+    <h2>Create Order</h2>
+    <form id="createOrderForm">
+      <label for="createOrderUserId">User ID:</label>
+      <input type="number" id="createOrderUserId" name="userId" >
+      <label for="createOrderProductId">Product ID:</label>
+      <input type="number" id="createOrderProductId" name="productId" >
+      <label for="createOrderQuantity">Quantity:</label>
+      <input type="number" id="createOrderQuantity" name="quantity" >
+      <button type="submit">Create Order</button>
+      <p id="createOrderMessage"></p>
+    </form>
+    
+    <h2>Update Order</h2>
+    <form id="updateOrderForm">
+      <label for="updateOrderId">Order ID:</label>
+      <input type="number" id="updateOrderId" name="id" >
+      <label for="updateOrderUserId">New User ID:</label>
+      <input type="number" id="updateOrderUserId" name="userId">
+      <label for="updateOrderProductId">New Product ID:</label>
+      <input type="number" id="updateOrderProductId" name="productId">
+      <label for="updateOrderQuantity">New Quantity:</label>
+      <input type="number" id="updateOrderQuantity" name="quantity">
+      <button type="submit">Update Order</button>
+      <p id="updateOrderMessage"></p>
+    </form>
+    
+    <h2>Delete Order</h2>
+    <form id="deleteOrderForm">
+      <label for="deleteOrderId">Order ID:</label>
+      <input type="number" id="deleteOrderId" name="id" >
+      <button type="submit">Delete Order</button>
+      <p id="deleteOrderMessage"></p>
+    </form>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+            const baseURL = 'http://localhost:3000/graphql';
+          
+            // Helper function to make GraphQL requests
+            async function graphqlRequest(query, variables) {
+              const response = await fetch(baseURL, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  query,
+                  variables,
+                }),
+              });
+              const data = await response.json();
+              return data.data;
+            }
+          
+            // Handle form submission for creating a user
+            document.getElementById('createUserForm').addEventListener('submit', async (event) => {
+              event.preventDefault();
+              const formData = new FormData(event.target);
+              const username = formData.get('username');
+              const email = formData.get('email');
+              try {
+                const query = `
+                  mutation CreateUser($username: String!, $email: String!) {
+                    createUser(username: $username, email: $email) {
+                      id
+                      username
+                      email
+                    }
+                  }
+                `;
+                const variables = { username, email };
+                const data = await graphqlRequest(query, variables);
+                document.getElementById('createUserMessage').textContent = 'User created successfully';
+              } catch (error) {
+                console.error('Error creating user:', error);
+                document.getElementById('createUserMessage').textContent = 'Error creating user';
+              }
+            });
+          
+            // Handle form submission for updating a user
+            document.getElementById('updateUserForm').addEventListener('submit', async (event) => {
+              event.preventDefault();
+              const formData = new FormData(event.target);
+              const id = parseInt(formData.get('id'));
+              const username = formData.get('username');
+              const email = formData.get('email');
+              try {
+                const query = `
+                  mutation UpdateUser($id: Int!, $username: String, $email: String) {
+                    updateUser(id: $id, username: $username, email: $email) {
+                      id
+                      username
+                      email
+                    }
+                  }
+                `;
+                const variables = { id, username, email };
+                const data = await graphqlRequest(query, variables);
+                document.getElementById('updateUserMessage').textContent = 'User updated successfully';
+              } catch (error) {
+                console.error('Error updating user:', error);
+                document.getElementById('updateUserMessage').textContent = 'Error updating user';
+              }
+            });
+          
+            // Handle form submission for deleting a user
+            document.getElementById('deleteUserForm').addEventListener('submit', async (event) => {
+              event.preventDefault();
+              const formData = new FormData(event.target);
+              const id = parseInt(formData.get('id'));
+              try {
+                const query = `
+                  mutation DeleteUser($id: Int!) {
+                    deleteUser(id: $id) {
+                      id
+                      username
+                      email
+                    }
+                  }
+                `;
+                const variables = { id };
+                const data = await graphqlRequest(query, variables);
+                document.getElementById('deleteUserMessage').textContent = 'User deleted successfully';
+              } catch (error) {
+                console.error('Error deleting user:', error);
+                document.getElementById('deleteUserMessage').textContent = 'Error deleting user';
+              }
+            });
+          
+       // Handle form submission for creating a product
+  document.getElementById('createProductForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const name = formData.get('name');
+    const description = formData.get('description');
+    const price = parseFloat(formData.get('price'));
+    try {
+      const query = `
+        mutation CreateProduct($name: String!, $description: String, $price: Float!) {
+          createProduct(name: $name, description: $description, price: $price) {
+            id
+            name
+            description
+            price
+          }
+        }
+      `;
+      const variables = { name, description, price };
+      const data = await graphqlRequest(query, variables);
+      document.getElementById('createProductMessage').textContent = 'Product created successfully';
+    } catch (error) {
+      console.error('Error creating product:', error);
+      document.getElementById('createProductMessage').textContent = 'Error creating product';
+    }
+  });
+
+  // Handle form submission for updating a product
+  document.getElementById('updateProductForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const id = parseInt(formData.get('id'));
+    const name = formData.get('name');
+    const description = formData.get('description');
+    const price = parseFloat(formData.get('price'));
+    try {
+      const query = `
+        mutation UpdateProduct($id: Int!, $name: String, $description: String, $price: Float) {
+          updateProduct(id: $id, name: $name, description: $description, price: $price) {
+            id
+            name
+            description
+            price
+          }
+        }
+      `;
+      const variables = { id, name, description, price };
+      const data = await graphqlRequest(query, variables);
+      document.getElementById('updateProductMessage').textContent = 'Product updated successfully';
+    } catch (error) {
+      console.error('Error updating product:', error);
+      document.getElementById('updateProductMessage').textContent = 'Error updating product';
+    }
+  });
+
+  
+  
+  // Handle form submission for updating an order
+  document.getElementById('updateOrderForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const id = parseInt(formData.get('id'));
+    const userId = parseInt(formData.get('userId'));
+    const productId = parseInt(formData.get('productId'));
+    const quantity = parseInt(formData.get('quantity'));
+    try {
+      const query = `
+        mutation UpdateOrder($id: Int!, $userId: Int, $productId: Int, $quantity: Int) {
+          updateOrder(id: $id, userId: $userId, productId: $productId, quantity: $quantity) {
+            id
+            userId
+            productId
+            quantity
+          }
+        }
+      `;
+      const variables = { id, userId, productId, quantity };
+      const data = await graphqlRequest(query, variables);
+      document.getElementById('updateOrderMessage').textContent = 'Order updated successfully';
+    } catch (error) {
+      console.error('Error updating order:', error);
+      document.getElementById('updateOrderMessage').textContent = 'Error updating order';
+    }
+  });
+  
+  // Handle form submission for deleting an order
+  document.getElementById('deleteOrderForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const id = parseInt(formData.get('id'));
+    try {
+      const query = `
+        mutation DeleteOrder($id: Int!) {
+          deleteOrder(id: $id) {
+            id
+            userId
+            productId
+            quantity
+          }
+        }
+      `;
+      const variables = { id };
+      const data = await graphqlRequest(query, variables);
+      document.getElementById('deleteOrderMessage').textContent = 'Order deleted successfully';
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      document.getElementById('deleteOrderMessage').textContent = 'Error deleting order';
+    }
+  });
+  
+// Handle form submission for deleting a product
+document.getElementById('deleteProductForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const id = parseInt(formData.get('id'));
+  try {
+    const query = `
+      mutation DeleteProduct($id: Int!) {
+        deleteProduct(id: $id) {
+          id
+          name
+          description
+          price
+        }
+      }
+    `;
+    const variables = { id };
+    const data = await graphqlRequest(query, variables);
+    document.getElementById('deleteProductMessage').textContent = 'Product deleted successfully';
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    document.getElementById('deleteProductMessage').textContent = 'Error deleting product';
+  }
+});
+
+// Handle form submission for creating an order
+document.getElementById('createOrderForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const userId = parseInt(formData.get('userId'));
+  const productId = parseInt(formData.get('productId'));
+  const quantity = parseInt(formData.get('quantity'));
+  try {
+    const query = `
+      mutation CreateOrder($userId: Int!, $productId: Int!, $quantity: Int!) {
+        createOrder(userId: $userId, productId: $productId, quantity: $quantity) {
+          id
+          userId
+          productId
+          quantity
+        }
+      }
+    `;
+    const variables = { userId, productId, quantity };
+    const data = await graphqlRequest(query, variables);
+    document.getElementById('createOrderMessage').textContent = 'Order created successfully';
+  } catch (error) {
+    console.error('Error creating order:', error);
+    document.getElementById('createOrderMessage').textContent = 'Error creating order';
+  }
+});
+       } );
+
+  
+    </script>
+    
 </body>
 </html>
